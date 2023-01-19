@@ -113,24 +113,23 @@ public class GeneratorProcessor
         }
     }
 
+    /// <summary>
+    /// This function breaks the character string into an array of characters.
+    /// </summary>
+    /// <param name="characters">The string of characters to break</param>
+    /// <param name="startIndex">The start index of the characters to break</param>
+    /// <param name="endIndex">The end index of the characters to break</param>
+    /// <returns>Returns a char array from specified range in string of characters.</returns>
     private char[] BreakCharacters(string characters, int startIndex, int endIndex)
     {
-        // print characters
-        System.Console.WriteLine(characters);
-        // print start end end index
-        System.Console.WriteLine("Start: " + startIndex);
-        System.Console.WriteLine("End: " + endIndex);
-        // create a new array object with the same length as the text we want to copy
+        // Create a new char array to hold the characters from startIndex to endIndex
         char[] output = new char[endIndex - startIndex];
-        int outputIndex = 0;
-        // copy each character from the source text to the output array
+
+        // Copy the characters from startIndex to endIndex into the output array
         for (int index = startIndex; index < endIndex; index++)
-        {
-            output[outputIndex] = characters[index];
-            System.Console.WriteLine(output[outputIndex]);
-            outputIndex++;
-        }
-        // return the new array
+            output[index - startIndex] = characters[index];
+
+        // Return the new char array
         return output;
     }
 
@@ -142,9 +141,9 @@ public class GeneratorProcessor
 
         StringBuilder sb = new StringBuilder();
         sb.Append(characters);
-        // sb.Append(characters.ToUpper());
-        // sb.Append(numbers);
-        // sb.Append(specialCharacters);
+        sb.Append(characters.ToUpper());
+        sb.Append(numbers);
+        sb.Append(specialCharacters);
 
         return sb.ToString();
     }
