@@ -1,6 +1,6 @@
 ﻿// Author: Samad Hatsijev
-// Date: 2019-01-01
-// Description: This is a tool that will help you to break a string into multiple threads
+// Date: 2023-01-21
+// Description: This class contains the logic for generating all possible combinations of the given length.
 
 using System.Text;
 
@@ -8,10 +8,29 @@ namespace CombinationsGenerator.Processors;
 
 public class GeneratorProcessor
 {
+    /// <summary>
+    /// This property contains the string of characters to use.
+    /// </summary>
     public string Characters { get; set; }
+
+    /// <summary>
+    /// This property contains the minimum length of the combinations.
+    /// </summary>
     public int MinLength { get; set; }
+
+    /// <summary>
+    /// This property contains the maximum length of the combinations.
+    /// </summary>
     public int MaxLength { get; set; }
+
+    /// <summary>
+    /// This property contains the number of threads to use.
+    /// </summary>
     public int NumberOfThreads { get; set; }
+
+    /// <summary>
+    /// This property contains the path to the output file.
+    /// </summary>
     public string FilePath { get; set; }
 
     public GeneratorProcessor()
@@ -23,8 +42,12 @@ public class GeneratorProcessor
         FilePath = "./combinations.csv";
     }
 
+    /// <summary>
+    /// This function starts the process of generating all possible combinations of the given length.
+    /// </summary>
     public void Start()
     {
+        // Declare a list of char arrays to store the characters
         using (StreamWriter outputFile = new StreamWriter(FilePath))
         {
             // Loop through the range of lengths
@@ -36,27 +59,36 @@ public class GeneratorProcessor
                 // Write the combinations to the output file
                 foreach (string combination in combinations)
                 {
-                    Console.WriteLine(combination);
+                    // Write the combination to the output file
                     outputFile.WriteLine(combination);
                 }
             }
         }
     }
 
+    /// <summary>
+    /// This function generates all possible combinations of the given length.
+    /// </summary>
+    /// <param name="characters">The string of characters to use</param>
+    /// <param name="length">The length of the combinations</param>
+    /// <param name="prefix">The prefix to use</param>
+    /// <returns>Returns an IEnumerable of strings containing all possible combinations of the given length.</returns>
     private static IEnumerable<string> GetCombinations(string characters, int length, string prefix = "")
     {
-        // Base case -- if length is zero, return prefix
+        // Empty string is a valid combination
         if (length == 0)
         {
             yield return prefix;
         }
-        // Recursive case -- for each character in the list,
-        // add it to the prefix and make a recursive call
         else
         {
+            // For each character in the string
             foreach (char c in characters)
             {
+                // Get the combinations of the remaining characters
                 var combinations = GetCombinations(characters, length - 1, prefix + c);
+
+                // Return each combination
                 foreach (string combination in combinations)
                 {
                     yield return combination;
@@ -65,12 +97,15 @@ public class GeneratorProcessor
         }
     }
 
+    /// <summary>
+    /// This function initiates the string of characters to use.
+    /// </summary>
     public void StartProcess()
     {
-        // Declare a list of char arrays
+        // Declare a list of char arrays to store the characters
         List<char[]> listOfCharArray = new List<char[]>();
 
-        // Create an array of integers to store the character start and end indexes
+        // Declare an array to store the character start and end indexes
         int[] array = new int[NumberOfThreads + 1];
 
         // Set the first element of the array to zero
@@ -103,6 +138,7 @@ public class GeneratorProcessor
             }
         }
 
+        // Iterate through the array of integers to store the character start and end indexes
         for (int index = 0; index < array.Length - 1; index++)
         {
             // Break the characters into an array
@@ -133,18 +169,27 @@ public class GeneratorProcessor
         return output;
     }
 
+    /// <summary>
+    /// This function initializes the string of characters to use.
+    /// </summary>
     private string InitiateString()
     {
-        string characters = "abcdefghijklmnopqrstuvwxyz";
-        string numbers = "0123456789";
-        string specialCharacters = "!@#$%^&*()_+";
-
+        // Declare a variable to hold the characters, numbers, and special characters
         StringBuilder sb = new StringBuilder();
-        sb.Append(characters);
-        sb.Append(characters.ToUpper());
-        sb.Append(numbers);
-        sb.Append(specialCharacters);
 
+        // Add the lowercase characters to the StringBuilder
+        sb.Append("abcdefghijklmnopqrstuvwxyz");
+
+        // Add the uppercase characters to the StringBuilder
+        sb.Append("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+        // Add the numbers to the StringBuilder
+        sb.Append("0123456789");
+
+        // Add the special characters to the StringBuilder
+        sb.Append("!@#$%^&*()_+");
+
+        // Return the characters, numbers, and special characters
         return sb.ToString();
     }
 }
