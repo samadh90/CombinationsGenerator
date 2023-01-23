@@ -42,6 +42,14 @@ public class GeneratorProcessor
         FilePath = "./combinations.csv";
     }
 
+    public void StartGenerating() 
+    {
+        List<List<string>> listOfCombinations = new List<List<string>>();
+
+        
+
+    }
+
     /// <summary>
     /// This function starts the process of generating all possible combinations of the given length.
     /// </summary>
