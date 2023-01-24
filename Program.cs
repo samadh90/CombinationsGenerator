@@ -8,6 +8,6 @@ public class Program
     {
         Console.WriteLine("Hello, World!");
         GeneratorProcessor processor = new GeneratorProcessor();
-        processor.StartProcess();
+        processor.StartProcess2();
     }
 }

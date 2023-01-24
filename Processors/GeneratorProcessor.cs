@@ -2,6 +2,7 @@
 // Date: 2023-01-21
 // Description: This class contains the logic for generating all possible combinations of the given length.
 
+using System.Collections.Concurrent;
 using System.Text;
 
 namespace CombinationsGenerator.Processors;
@@ -36,18 +37,10 @@ public class GeneratorProcessor
     public GeneratorProcessor()
     {
         MinLength = 4;
-        MaxLength = 4;
+        MaxLength = 6;
         Characters = InitiateString();
-        NumberOfThreads = 4;
+        NumberOfThreads = 6;
         FilePath = "./combinations.csv";
-    }
-
-    public void StartGenerating() 
-    {
-        List<List<string>> listOfCombinations = new List<List<string>>();
-
-        
-
     }
 
     /// <summary>
@@ -70,6 +63,99 @@ public class GeneratorProcessor
                     // Write the combination to the output file
                     outputFile.WriteLine(combination);
                 }
+            }
+        }
+    }
+
+    public void StartProcess()
+    {
+        List<char[]> listOfCharacters = GetListOfCharacters();
+        List<string> generatedCombinations = new List<string>();
+
+        foreach (char[] characters in listOfCharacters)
+        {
+            for (int index = 0; index < characters.Length; index++)
+            {
+                ClearMemory(generatedCombinations);
+                var combinations = GetCombinations(Characters, MaxLength - 1);
+                foreach (var item in combinations)
+                {
+                    string combination = $"{characters[index]}{item}";
+                    generatedCombinations.Add(combination);
+                }
+                SaveToCSV(generatedCombinations, characters[index]);
+                Console.WriteLine(characters[index]);
+            }
+        }
+    }
+
+    public void StartProcess2()
+    {
+        List<char[]> listOfCharacters = GetListOfCharacters();
+
+        // Use a ConcurrentBag to store the generated combinations
+        // This allows multiple threads to add items to the collection safely
+        ConcurrentBag<string> generatedCombinations = new ConcurrentBag<string>();
+
+        // Create a list to store the tasks
+        List<Task> tasks = new List<Task>();
+
+        foreach (char[] characters in listOfCharacters)
+        {
+            // Create a new task for each character
+            var task = Task.Run(() =>
+            {
+                for (int index = 0; index < characters.Length; index++)
+                {
+                    // Get the combinations for the current character
+                    var combinations = GetCombinations(Characters, MaxLength - 1);
+                    // Create a new list for the combinations
+                    List<string> localCombinations = new List<string>();
+                    // Add the combinations to the list
+                    foreach (var item in combinations)
+                    {
+                        string combination = $"{characters[index]}{item}";
+                        localCombinations.Add(combination);
+                    }
+
+                    // Add the localCombinations to the generatedCombinations
+                    foreach (var item in localCombinations)
+                    {
+                        generatedCombinations.Add(item);
+                    }
+
+                    // Save the generated combinations to a CSV file
+                    SaveToCSV(localCombinations, characters[index]);
+                    Console.WriteLine(characters[index]);
+
+                }
+            });
+
+            // Add the task to the list
+            tasks.Add(task);
+        }
+
+        // Wait for all tasks to complete
+        Task.WaitAll(tasks.ToArray());
+    }
+
+    public void ClearMemory(List<string> lista)
+    {
+        int identificador = GC.GetGeneration(lista);
+        lista.Clear();
+        GC.Collect(identificador, GCCollectionMode.Forced);
+    }
+
+    public void SaveToCSV(List<string> list, char character)
+    {
+        // convert char to ascii
+        int asciiValue = Encoding.ASCII.GetBytes(new char[] { character })[0];
+
+        using (StreamWriter outputFile = new StreamWriter($"./files/combinations{asciiValue}.csv"))
+        {
+            foreach (string combination in list)
+            {
+                outputFile.WriteLine(combination);
             }
         }
     }
@@ -108,10 +194,10 @@ public class GeneratorProcessor
     /// <summary>
     /// This function initiates the string of characters to use.
     /// </summary>
-    public void StartProcess()
+    public List<char[]> GetListOfCharacters()
     {
         // Declare a list of char arrays to store the characters
-        List<char[]> listOfCharArray = new List<char[]>();
+        List<char[]> output = new List<char[]>();
 
         // Declare an array to store the character start and end indexes
         int[] array = new int[NumberOfThreads + 1];
@@ -153,8 +239,10 @@ public class GeneratorProcessor
             char[] characters = BreakCharacters(Characters, array[index], array[index + 1]);
 
             // Add the array to the list of char arrays
-            listOfCharArray.Add(characters);
+            output.Add(characters);
         }
+
+        return output;
     }
 
     /// <summary>
@@ -188,14 +276,14 @@ public class GeneratorProcessor
         // Add the lowercase characters to the StringBuilder
         sb.Append("abcdefghijklmnopqrstuvwxyz");
 
-        // Add the uppercase characters to the StringBuilder
-        sb.Append("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        //// Add the uppercase characters to the StringBuilder
+        //sb.Append("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
-        // Add the numbers to the StringBuilder
-        sb.Append("0123456789");
+        ////// Add the numbers to the StringBuilder
+        //sb.Append("0123456789");
 
-        // Add the special characters to the StringBuilder
-        sb.Append("!@#$%^&*()_+");
+        ////// Add the special characters to the StringBuilder
+        //sb.Append("!@#$%^&*()_+");
 
         // Return the characters, numbers, and special characters
         return sb.ToString();
